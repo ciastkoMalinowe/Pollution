@@ -22,7 +22,11 @@ loop(Monitor) ->
       orelse Function == getAirQualityIndex ->
 
       Args = lists:append(Arguments, [Monitor]),
-      Pid!{reply, apply(pollution, Function, Args)},
+      P = apply(pollution, Function, Args),
+      case P of
+        {error, Message} -> Pid!{reply, {error, Message}};
+        _                -> Pid!{reply, P}
+      end,
       loop(Monitor);
 
     {request, Pid, stop, _} ->
@@ -33,16 +37,27 @@ loop(Monitor) ->
       orelse Function == addValue
       orelse Function == removeValue ->
 
-      Pid!{reply, ok},
       Args = lists:append(Arguments, [Monitor]),
-      loop( apply(pollution, Function, Args))
+      M = apply(pollution, Function, Args),
+      case M of
+        {error, Message} ->
+          Pid!{reply,{error,Message}},
+          loop(Monitor);
+        _ ->
+          Pid!{reply, ok},
+          loop(M)
+      end
   end.
 
 
 call(Function, Arguments) ->
   pollutionServer ! {request, self(), Function, Arguments},
   receive
-    {reply, Reply} -> Reply
+    {reply, Reply} ->
+      case Reply of
+        {error, Message} -> Message;
+        _                -> Reply
+      end
   end.
 
 createMonitor() -> call(createMonitor,[]).

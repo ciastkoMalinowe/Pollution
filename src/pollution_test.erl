@@ -14,33 +14,38 @@ addValue_doublyAddedByName_test() ->
   P1 = addStation("Station 1", {10, 10}, P),
   P2 = addValue("Station 1", {{2017,5,4},{20,52,0}}, "PM10", 100.0, P1),
   P3 = addValue("Station 1", {{2017,5,4},{20,52,0}}, "PM10", 100.0, P2),
-  ?assertEqual(P2, P3).
+  {E,_} = P3,
+  ?assertEqual(error, E).
 
 addValue_doublyAddedByCoordinates_test() ->
   P = createMonitor(),
   P1 = addStation("Station 1", {10, 10}, P),
   P2 = addValue({10, 10}, {{2017,5,4},{20,52,0}}, "PM10", 100.0, P1),
   P3 = addValue({10, 10}, {{2017,5,4},{20,52,0}}, "PM10", 100.0, P2),
-  ?assertEqual(P2, P3).
+  {E,_} = P3,
+  ?assertEqual(error, E).
 
 addValue_doublyAddedByNameAndByCoordinates_test() ->
   P = createMonitor(),
   P1 = addStation("Station 1", {10, 10}, P),
   P2 = addValue("Station 1", {{2017,5,4},{20,52,0}}, "PM10", 100.0, P1),
   P3 = addValue({10, 10}, {{2017,5,4},{20,52,0}}, "PM10", 100.0, P2),
-  ?assertEqual(P2, P3).
+  {E,_} = P3,
+  ?assertEqual(error, E).
 
 addValue_measurementsDiffValue_test() ->
   P = createMonitor(),
   P1 = addStation("Station 1", {10, 10}, P),
   P2 = addValue("Station 1", {{2017,5,4},{20,52,0}}, "PM10", 100.0, P1),
   P3 = addValue("Station 1", {{2017,5,4},{20,52,0}}, "PM10", 120.0, P2),
-  ?assertEqual(P2, P3).
+  {E,_} = P3,
+  ?assertEqual(error, E).
 
 addValue_notExistingStation_test() ->
   P = createMonitor(),
   P1 = addValue("Station 1", {{2017,5,4},{20,52,0}}, "PM10", 100.0, P),
-  ?assertEqual(P, P1).
+  {E,_} = P1,
+  ?assertEqual(error, E).
 
 getAirQualityIndex_test() ->
   P = createMonitor(),
@@ -51,4 +56,6 @@ getAirQualityIndex_test() ->
 
 getAirQualityIndex_noValues_test() ->
   P = createMonitor(),
-  ?assertEqual(no_station, getAirQualityIndex("Station 1", {{2017,5,4},{20,52,0}}, P)).
+  R = getAirQualityIndex("Station 1", {{2017,5,4},{20,52,0}}, P),
+  {E, _} = R,
+  ?assertEqual(error, E).
